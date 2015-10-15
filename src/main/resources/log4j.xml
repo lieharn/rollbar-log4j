@@ -9,8 +9,7 @@
 	</appender>
 
 	<appender name="ROLLBAR" class="com.github.rollbar.log4j.RollbarAppender">
-		<param name="accessToken" value="c6af3dbf6acb498ca25664f457a0b5a9" />
-		<param name="enviroment" value="local" />
+
 	</appender>
 
 	<root>

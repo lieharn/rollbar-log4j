@@ -31,7 +31,7 @@ public class RollbarAppender extends AppenderSkeleton {
 	private boolean errors = false;
 	private final IHttpRequester httpRequester = new HttpRequester();
 
-	public RollbarAppender() {
+	public RollbarAppender(String accessToken, String environment) {
 		try {
 			this.url = new URL("https://api.rollbar.com/api/1/item/");
 		} catch (MalformedURLException e) {
@@ -53,6 +53,7 @@ public class RollbarAppender extends AppenderSkeleton {
 			errors = true;
 		}
 	}
+
 
 	@Override
 	public void close() {
