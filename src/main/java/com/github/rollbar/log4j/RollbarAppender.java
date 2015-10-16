@@ -23,9 +23,9 @@ public class RollbarAppender extends AppenderSkeleton {
     private String apiKey;
     private String environment;
     private String rollbarContext;
-    private boolean async = true;
+    private boolean async = false;
     private boolean enabled = true;
-    private boolean initialised = false;
+    private boolean initialised = true;
     private Level level = Level.ERROR;
 
     private IHttpRequester httpRequester = new HttpRequester();
@@ -60,15 +60,26 @@ public class RollbarAppender extends AppenderSkeleton {
         if (this.initialised) {
             String levelName = event.getLevel().toString().toLowerCase();
             String message = this.layout.format(event);
-            Throwable throwable = this.getThrowable(event);
+            Throwable throwable = null;
+            if (this.thereIsThrowableIn(event)) {
+                throwable = this.getThrowable(event);
+            }
             final JSONObject payload = payloadBuilder.build(levelName, message, throwable, new HashMap<String, String>());
             final HttpRequest request = new HttpRequest(url, "POST");
             request.setHeader("Content-Type", "application/json");
             request.setHeader("Accept", "application/json");
             request.setBody(payload.toString());
-            sendRequest(request);
+            if (async) {
+                payloadBuilder.EXECUTOR.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        sendRequest(request);
+                    }
+                });
+            } else {
+                sendRequest(request);
+            }
         }
-
     }
 
 
@@ -83,6 +94,10 @@ public class RollbarAppender extends AppenderSkeleton {
         } catch (IOException e) {
             LogLog.error("Exception sending request to Rollbar", e);
         }
+    }
+
+    private boolean thereIsThrowableIn(LoggingEvent loggingEvent) {
+        return loggingEvent.getThrowableInformation() != null || loggingEvent.getMessage() instanceof Throwable;
     }
 
 

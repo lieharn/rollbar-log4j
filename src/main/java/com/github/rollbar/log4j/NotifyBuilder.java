@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 public class NotifyBuilder {
 
@@ -21,6 +25,16 @@ public class NotifyBuilder {
 
     private final JSONObject notifierData;
     private final JSONObject serverData;
+    protected static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(2,
+            new ThreadFactory() {
+                public Thread newThread(Runnable runnable) {
+                    Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+                    thread.setName("RollbarNotifier-" + new Random().nextInt(100));
+                    return thread;
+                }
+            }
+    );
+
 
     public NotifyBuilder(String accessToken, String environment, String rollbarContext) throws JSONException, UnknownHostException {
         this.accessToken = accessToken;
@@ -29,7 +43,7 @@ public class NotifyBuilder {
         this.notifierData = getNotifierData();
         this.serverData = getServerData();
     }
-    
+
 
     private String getValue(String key, Map<String, String> context, String defaultValue) {
         if (context == null) return defaultValue;
@@ -74,18 +88,18 @@ public class NotifyBuilder {
 
         return payload;
     }
-    
-    private JSONObject buildClient(Map<String, String> ctx){
+
+    private JSONObject buildClient(Map<String, String> ctx) {
         JSONObject client = new JSONObject();
         JSONObject javaScript = new JSONObject();
         javaScript.put("browser", ctx.get(RollbarFilter.REQUEST_USER_AGENT));
         client.put("javascript", javaScript);
         return client;
     }
-    
-    private JSONObject buildCustom(Map<String, String> ctx){
+
+    private JSONObject buildCustom(Map<String, String> ctx) {
         JSONObject custom = new JSONObject();
-        for (Entry<String, String> ctxEntry : ctx.entrySet()){
+        for (Entry<String, String> ctxEntry : ctx.entrySet()) {
             String key = ctxEntry.getKey();
             if (key.startsWith(RollbarFilter.REQUEST_PREFIX))
                 continue;
@@ -93,44 +107,44 @@ public class NotifyBuilder {
         }
         return custom;
     }
-    
-    private String stripPrefix(String value, String prefix){
+
+    private String stripPrefix(String value, String prefix) {
         return value.substring(prefix.length(), value.length());
     }
-    
-    private JSONObject buildRequest(Map<String, String> ctx){
+
+    private JSONObject buildRequest(Map<String, String> ctx) {
         JSONObject request = new JSONObject();
         request.put("url", ctx.get(RollbarFilter.REQUEST_URL));
         request.put("query_string", ctx.get(RollbarFilter.REQUEST_QS));
-        
+
         JSONObject headers = new JSONObject();
         JSONObject params = new JSONObject();
-        
-        for (Entry<String, String> ctxEntry : ctx.entrySet()){
+
+        for (Entry<String, String> ctxEntry : ctx.entrySet()) {
             String key = ctxEntry.getKey();
-            if (key.startsWith(RollbarFilter.REQUEST_HEADER_PREFIX)){
+            if (key.startsWith(RollbarFilter.REQUEST_HEADER_PREFIX)) {
                 headers.put(stripPrefix(key, RollbarFilter.REQUEST_HEADER_PREFIX), ctxEntry.getValue());
-            } else if (key.startsWith(RollbarFilter.REQUEST_PARAM_PREFIX)){
+            } else if (key.startsWith(RollbarFilter.REQUEST_PARAM_PREFIX)) {
                 params.put(stripPrefix(key, RollbarFilter.REQUEST_PARAM_PREFIX), ctxEntry.getValue());
             }
         }
-        
+
         request.put("headers", headers);
-        
+
         String method = ctx.get(RollbarFilter.REQUEST_METHOD);
-        if (method != null){
+        if (method != null) {
             request.put("method", method);
-            switch (method){
-            case "GET":
-                request.put("GET", params);
-                break;
-            case "POST":
-                request.put("POST", params);
-                break;
+            switch (method) {
+                case "GET":
+                    request.put("GET", params);
+                    break;
+                case "POST":
+                    request.put("POST", params);
+                    break;
             }
         }
-        
-        
+
+
         request.put("user_ip", ctx.get(RollbarFilter.REQUEST_REMOTE_ADDR));
         return request;
     }
@@ -210,5 +224,7 @@ public class NotifyBuilder {
 
         return trace;
     }
+
+
 
 }
