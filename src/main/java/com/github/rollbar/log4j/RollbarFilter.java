@@ -1,17 +1,12 @@
 package com.github.rollbar.log4j;
 
+
+import org.apache.log4j.MDC;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Enumeration;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.MDC;
 
 
 public class RollbarFilter implements Filter {
@@ -25,10 +20,9 @@ public class RollbarFilter implements Filter {
     public static final String REQUEST_HEADER_PREFIX = REQUEST_PREFIX + "header.";
     public static final String REQUEST_PARAM_PREFIX = REQUEST_PREFIX + "param.";
 
-    @Override
+
     public void init(FilterConfig config) throws ServletException {}
 
-    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 
         insertIntoMDC(servletRequest);
@@ -73,7 +67,7 @@ public class RollbarFilter implements Filter {
         MDC.clear();
     }
 
-    @Override
+
     public void destroy() {}
 
 }

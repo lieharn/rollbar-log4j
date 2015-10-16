@@ -1,15 +1,15 @@
 package com.github.rollbar.log4j;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class NotifyBuilder {
 
@@ -31,17 +31,14 @@ public class NotifyBuilder {
     }
     
 
-	private String getValue(String key, Map<String, String> context, String defaultValue) {
-		if (context == null)
-			return defaultValue;
+    private String getValue(String key, Map<String, String> context, String defaultValue) {
+        if (context == null) return defaultValue;
         Object value = context.get(key);
-		if (value == null)
-			return defaultValue;
+        if (value == null) return defaultValue;
         return value.toString();
     }
 
-	public JSONObject build(String level, String message, Throwable throwable, Map<String, String> context)
-			throws JSONException {
+    public JSONObject build(String level, String message, Throwable throwable, Map<String, String> context) throws JSONException {
 
         JSONObject payload = new JSONObject();
 
@@ -78,7 +75,7 @@ public class NotifyBuilder {
         return payload;
     }
     
-	private JSONObject buildClient(Map<String, String> ctx) {
+    private JSONObject buildClient(Map<String, String> ctx){
         JSONObject client = new JSONObject();
         JSONObject javaScript = new JSONObject();
         javaScript.put("browser", ctx.get(RollbarFilter.REQUEST_USER_AGENT));
@@ -86,9 +83,9 @@ public class NotifyBuilder {
         return client;
     }
     
-	private JSONObject buildCustom(Map<String, String> ctx) {
+    private JSONObject buildCustom(Map<String, String> ctx){
         JSONObject custom = new JSONObject();
-		for (Entry<String, String> ctxEntry : ctx.entrySet()) {
+        for (Entry<String, String> ctxEntry : ctx.entrySet()){
             String key = ctxEntry.getKey();
             if (key.startsWith(RollbarFilter.REQUEST_PREFIX))
                 continue;
@@ -101,7 +98,7 @@ public class NotifyBuilder {
         return value.substring(prefix.length(), value.length());
     }
     
-	private JSONObject buildRequest(Map<String, String> ctx) {
+    private JSONObject buildRequest(Map<String, String> ctx){
         JSONObject request = new JSONObject();
         request.put("url", ctx.get(RollbarFilter.REQUEST_URL));
         request.put("query_string", ctx.get(RollbarFilter.REQUEST_QS));
@@ -109,7 +106,7 @@ public class NotifyBuilder {
         JSONObject headers = new JSONObject();
         JSONObject params = new JSONObject();
         
-		for (Entry<String, String> ctxEntry : ctx.entrySet()) {
+        for (Entry<String, String> ctxEntry : ctx.entrySet()){
             String key = ctxEntry.getKey();
             if (key.startsWith(RollbarFilter.REQUEST_HEADER_PREFIX)){
                 headers.put(stripPrefix(key, RollbarFilter.REQUEST_HEADER_PREFIX), ctxEntry.getValue());
@@ -120,7 +117,7 @@ public class NotifyBuilder {
         
         request.put("headers", headers);
         
-		String method = ctx.get(RollbarFilter.REQUEST_METHOD);
+        String method = ctx.get(RollbarFilter.REQUEST_METHOD);
         if (method != null){
             request.put("method", method);
             switch (method){
