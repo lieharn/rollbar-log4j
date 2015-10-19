@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.prefs.Preferences;
 
 
 public class RollbarAppender extends AppenderSkeleton {
@@ -25,8 +26,11 @@ public class RollbarAppender extends AppenderSkeleton {
     private String rollbarContext;
     private boolean async = false;
     private boolean enabled = true;
-    private boolean initialised = true;
+    private boolean initialised = false;
     private Level level = Level.ERROR;
+    private static final boolean ACTIVATED_DEFAULT = false;
+
+    private static final Preferences prefs = Preferences.userNodeForPackage(RollbarAppender.class);
 
     public Level getLevel() {
         return level;
@@ -51,6 +55,10 @@ public class RollbarAppender extends AppenderSkeleton {
     @Override
     public synchronized void activateOptions() {
         super.activateOptions();
+        if(!prefs.getBoolean("activated", ACTIVATED_DEFAULT)) {
+            LogLog.warn("preference for this appender is not set.");
+            enabled = false;
+        }
         if (enabled) {
             if (this.url != null && this.apiKey != null && !this.apiKey.isEmpty() && this.environment != null && !this.environment.isEmpty() && this.layout != null) {
                 try {
