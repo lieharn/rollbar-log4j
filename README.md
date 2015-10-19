@@ -10,7 +10,7 @@ setup
 =============
 Add this dependencies to your pom.xml
 
-log4j appender 
+###### log4j appender 
 
     <dependency>
       <groupId>com.github.rollbar.log4j</groupId>
@@ -18,7 +18,7 @@ log4j appender
       <version>1.0</version>
     </dependency>
   
-further dependencies
+###### further dependencies
 
     <dependency>
       <groupId>log4j</groupId>
@@ -36,8 +36,43 @@ further dependencies
       <version>20140107</version>
     </dependency>
     
-log4j config
+###### log4j config
 
+        <?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+        <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+        
+            <appender name="console" class="org.apache.log4j.ConsoleAppender">
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %C:%L - %m%n"/>
+                </layout>
+            </appender>
+        
+            <appender name="rollbar" class="com.github.rollbar.log4j.RollbarAppender">
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %C:%L - %m%n"/>
+                </layout>
+                <param name="enabled" value="true"></param>
+                <param name="apiKey" value="[YOUR API KEY]"></param>
+                <param name="environment" value="production"></param>
+                <param name="level" value="info"></param>
+            </appender>
+        
+            <root>
+                <level value="INFO"/>
+                <appender-ref ref="console"/>
+                <appender-ref ref="rollbar"/>
+            </root>
+        </log4j:configuration>
 
+###### pref
   
-  
+  * you need to add a preference to enable the appender
+    
+add this to your registry
+
+        com.github.rollbar.log4j activated true
+        
+development
+=============
+I will add test and further configurations later. 
