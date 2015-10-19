@@ -49,8 +49,11 @@ public class HttpRequester implements IHttpRequester {
     }
     
     private void writeBody(byte[] body, HttpURLConnection connection) throws IOException {
-        try (OutputStream out = new BufferedOutputStream(connection.getOutputStream())){
+        OutputStream out = new BufferedOutputStream(connection.getOutputStream());
+        try {
             out.write(body);
+        } finally {
+            out.close();
         }
     }
 

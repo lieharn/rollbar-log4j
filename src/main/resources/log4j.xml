@@ -13,10 +13,10 @@
             <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %C:%L - %m%n"/>
         </layout>
         <param name="enabled" value="true"></param>
-        <param name="apiKey" value="****"></param>
+        <param name="apiKey" value="c6af3dbf6acb498ca25664f457a0b5a9"></param>
         <param name="environment" value="production"></param>
+        <param name="level" value="info"></param>
     </appender>
-
 
     <root>
         <level value="INFO"/>

@@ -4,6 +4,6 @@ import java.io.IOException;
 
 public interface IHttpRequester {
     
-    public int send(HttpRequest request) throws IOException;
+    int send(HttpRequest request) throws IOException;
 
 }

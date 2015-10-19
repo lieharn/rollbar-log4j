@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -29,7 +28,6 @@ public class NotifyBuilder {
             new ThreadFactory() {
                 public Thread newThread(Runnable runnable) {
                     Thread thread = Executors.defaultThreadFactory().newThread(runnable);
-                    thread.setName("RollbarNotifier-" + new Random().nextInt(100));
                     return thread;
                 }
             }
@@ -134,13 +132,10 @@ public class NotifyBuilder {
         String method = ctx.get(RollbarFilter.REQUEST_METHOD);
         if (method != null) {
             request.put("method", method);
-            switch (method) {
-                case "GET":
-                    request.put("GET", params);
-                    break;
-                case "POST":
-                    request.put("POST", params);
-                    break;
+            if(method.equals("GET")){
+                request.put("GET", params);
+            }else if(method.equals("POST")){
+                request.put("POST", params);
             }
         }
 

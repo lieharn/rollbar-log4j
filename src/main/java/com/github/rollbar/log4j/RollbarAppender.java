@@ -28,6 +28,16 @@ public class RollbarAppender extends AppenderSkeleton {
     private boolean initialised = true;
     private Level level = Level.ERROR;
 
+    public Level getLevel() {
+        return level;
+    }
+
+    public void setLevel(Level level) {
+        this.level = level;
+    }
+
+
+
     private IHttpRequester httpRequester = new HttpRequester();
 
     public RollbarAppender() {
@@ -46,8 +56,10 @@ public class RollbarAppender extends AppenderSkeleton {
                 try {
                     payloadBuilder = new NotifyBuilder(apiKey, environment, rollbarContext);
                     initialised = true;
-                } catch (JSONException | UnknownHostException e) {
-                    LogLog.error("Error building NotifyBuilder", e);
+                } catch (JSONException e) {
+                    LogLog.error("JSON Error building NotifyBuilder", e);
+                } catch (UnknownHostException e) {
+                    LogLog.error("Network Error building NotifyBuilder", e);
                 }
             } else {
                 LogLog.error("Rollbar's url or apiKey or environment or layout is empty");
@@ -57,29 +69,36 @@ public class RollbarAppender extends AppenderSkeleton {
 
     @Override
     protected void append(LoggingEvent event) {
-        if (this.initialised) {
-            String levelName = event.getLevel().toString().toLowerCase();
-            String message = this.layout.format(event);
-            Throwable throwable = null;
-            if (this.thereIsThrowableIn(event)) {
-                throwable = this.getThrowable(event);
-            }
-            final JSONObject payload = payloadBuilder.build(levelName, message, throwable, new HashMap<String, String>());
-            final HttpRequest request = new HttpRequest(url, "POST");
-            request.setHeader("Content-Type", "application/json");
-            request.setHeader("Accept", "application/json");
-            request.setBody(payload.toString());
-            if (async) {
-                payloadBuilder.EXECUTOR.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        sendRequest(request);
-                    }
-                });
-            } else {
-                sendRequest(request);
-            }
+        // Not initialised, don't push log
+        if (!this.initialised) {
+            return;
         }
+        // Log Level is not enough, don't push log
+        if (!hasToNotify(event.getLevel())) {
+            return;
+        }
+        String levelName = event.getLevel().toString().toLowerCase();
+        String message = this.layout.format(event);
+        Throwable throwable = null;
+        if (this.thereIsThrowableIn(event)) {
+            throwable = this.getThrowable(event);
+        }
+        final JSONObject payload = payloadBuilder.build(levelName, message, throwable, new HashMap<String, String>());
+        final HttpRequest request = new HttpRequest(url, "POST");
+        request.setHeader("Content-Type", "application/json");
+        request.setHeader("Accept", "application/json");
+        request.setBody(payload.toString());
+        if (async) {
+            payloadBuilder.EXECUTOR.execute(new Runnable() {
+                @Override
+                public void run() {
+                    sendRequest(request);
+                }
+            });
+        } else {
+            sendRequest(request);
+        }
+
     }
 
 
