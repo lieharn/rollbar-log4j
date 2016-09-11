@@ -6,7 +6,7 @@
     <groupId>com.github.rollbar.log4j</groupId>
     <artifactId>appender</artifactId>
     <version>1.0</version>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
+            <version>3.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
@@ -37,6 +37,27 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
+              <plugin>
+                  <groupId>org.apache.felix</groupId>
+                  <artifactId>maven-bundle-plugin</artifactId>
+                  <version>1.4.0</version>
+                  <extensions>true</extensions>
+                  <configuration>
+                      <instructions>
+                          <Bundle-SymbolicName>${project.groupId}</Bundle-SymbolicName>
+                          <Bundle-Name>${project.artifactId}</Bundle-Name>
+                          <Bundle-Version>1.0.0</Bundle-Version>
+                          <Import-Package>
+                              org.apache.log4j.*,
+                              org.json.*,
+                              javax.servlet.*;version="[2.5.0,2.9.0]"
+                          </Import-Package>
+                          <Export-Package>
+                          	com.github.rollbar.log4j.*
+                          </Export-Package>
+                      </instructions>
+                  </configuration>
+              </plugin>
         </plugins>
     </build>
 
