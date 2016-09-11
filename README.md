@@ -5,6 +5,7 @@ This is a library for rollbar and log4j to integrate Java apps with [Rollbar](ht
 The library is inspired by [rollbar-java] (https://github.com/rafael-munoz/rollbar-java) by Rafael Munoz and
 [rollbar-maven] (https://github.com/borjafpa/rollbar-maven) by Borja Pernia
 
+Maven will produce an OSGI-enabled JAR file.
 
 setup
 =============
